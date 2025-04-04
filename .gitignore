@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+
+# dotenv environment variables
+.env
+
+# logs
+logs
+*.log
+
+# system files
+.DS_Store
+Thumbs.db
+
+# build/compiled output (if any)
+/dist
+/build
+
+# coverage reports
+coverage/
+
+# optional: lock files if you want to avoid cross-platform conflicts
+# package-lock.json
+# yarn.lock
+
+# work and learning files
+
+workfiles/
