@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "title": "Producto de prueba",
+    "description": "Descripción del producto de prueba",
+    "price": 99.99,
+    "thumbnail": "ruta/a/la/imagen.jpg",
+    "code": "PRD001",
+    "stock": 10
+  }
+]
