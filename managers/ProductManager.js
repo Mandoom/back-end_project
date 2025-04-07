@@ -36,6 +36,7 @@ class ProductManager {
 
     }; // end read file 
 
+    
 
     async addProduct(product) {
 
