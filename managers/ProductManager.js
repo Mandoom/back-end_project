@@ -89,31 +89,30 @@ class ProductManager {
         const products = await this._getProducts();
         const index = products.findIndex(product => product.id === id );
         if (index === -1) {
-          throw new Error('Product no encontrado');
+          throw new Error('Product no encontrado');}
 
           //Avoid updating the id
 
           delete updateData.id; //delete the property 
-          const updatedProduct = {...products[index], ...updateData};
-          products[index] = this.updateProduct;
-          await this_saveProducts(products);
+          const updatedProduct = {...products[index], ...updateData };
+          products[index] = updatedProduct;
+          await this._saveProducts(products);
           return updatedProduct;
         }
-      }
+      
 
       async deleteProduct(id) {
 
         const products = await this._getProducts();
         const newProducts = products.filter(product => product.id !== id);
-        if (newProducts.lenght === products.lenght) {
+        if (newProducts.length === products.length) {
           throw new Error('Producto no encontrado')
         }
-
         await this._saveProducts(newProducts);
         return true;
-
-      };
-}
+      }
+    
+    }
 
 
 export default ProductManager;
