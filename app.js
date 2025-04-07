@@ -151,8 +151,8 @@ cartRouter.post('/:cid/product/:pid', async (req, res) => {
   }
 });
 
-app.use('/api/products', productRouter);
-app.use('/api/carts', cartRouter);
+app.use('/products', productRouter);
+app.use('/carts', cartRouter);
 
 
 
