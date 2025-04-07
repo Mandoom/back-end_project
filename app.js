@@ -1,5 +1,6 @@
 import express from 'express';
 import ProductManager from './managers/ProductManager.js';
+//import CartManager from './managers/CartManager.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,11 +8,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Construir la ruta absoluta al archivo de productos
-const absoluteFilePath = path.join(__dirname, './data/products.json');
+// absolute routes for JSON files.
+const absoluteProductsPath = path.join(__dirname, './data/products.json');
+//const absoluteCartsPath = path.join(__dirname, '.data/carts.json')
 
 // Crear una instancia de ProductManager
-const productManager = new ProductManager(absoluteFilePath);
+const productManager = new ProductManager(absoluteProductsPath);
 
 const app = express();
 const PORT = 3000;

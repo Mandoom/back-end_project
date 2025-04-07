@@ -36,18 +36,28 @@ class ProductManager {
 
     }; // end read file 
 
-    
+    async _saveProducts(products) { // modularize for add procts and others.
+      await fs.writeFile(this.path, JSON.stringify(products, null, 2));
+    };
 
     async addProduct(product) {
 
-        const requiredFields = ['title', 'description', 'price', 'thumbnail', 'code', 'stock'];
+        const requiredFields = [
+          'title', 
+          'description', 
+          'price', 
+          'thumbnail', 
+          'code', 
+          'stock',
+          'category',
+          'thumbnails'
+        ];
+
         for (const field of requiredFields) {
           if (!product.hasOwnProperty(field) || product[field] === undefined) {
             throw new Error(`El campo '${field}' es obligatorio.`);
           }
         }
-
-
 
         // Leer productos existentes o inicializar un arreglo vacío
         const products = await this._getProducts();
@@ -63,7 +73,7 @@ class ProductManager {
         // Agregar el nuevo producto al arreglo
         products.push(newProduct);
         // Guardar el arreglo actualizado en el archivo
-        await fs.writeFile(this.path, JSON.stringify(products, null, 2));
+        await this._saveProducts(products);
         return newProduct;
       }
 
@@ -73,11 +83,38 @@ class ProductManager {
         // Busca y retorna el producto cuyo id coincida
         return products.find(product => product.id === id);
       }
+
+      async updateProduct(id, updateData){
+
+        const products = await this._getProducts();
+        const index = products.findIndex(product => product.id === id );
+        if (index === -1) {
+          throw new Error('Product no encontrado');
+
+          //Avoid updating the id
+
+          delete updateData.id; //delete the property 
+          const updatedProduct = {...products[index], ...updateData};
+          products[index] = this.updateProduct;
+          await this_saveProducts(products);
+          return updatedProduct;
+        }
+      }
+
+      async deleteProduct(id) {
+
+        const products = await this._getProducts();
+        const newProducts = products.filter(product => product.id !== id);
+        if (newProducts.lenght === products.lenght) {
+          throw new Error('Producto no encontrado')
+        }
+
+        await this._saveProducts(newProducts);
+        return true;
+
+      };
 }
 
-const productManager = new ProductManager(absoluteFilePath) // if we dont make the methods static properties, we need to create an instance of the productmanager 
 
-productManager._getProducts()
-
-export default ProductManager
+export default ProductManager;
 
