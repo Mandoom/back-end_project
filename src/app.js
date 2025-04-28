@@ -1,146 +1,72 @@
 import express from 'express';
+import { engine } from 'express-handlebars';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server } from 'socket.io';
 
 import productRouter from './routes/products.js';
 import cartRouter    from './routes/carts.js';
+import viewsRouter from './routes/views.js'
 
-// import ProductManager from './managers/ProductManager.js';
-// import CartManager from './managers/CartManager.js'
+import ProductManager from './managers/ProductManager.js';
 
 
 // Crear __dirname para ES modules usando import.meta.url
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// absolute routes for JSON files. --moved to routes directly.
-// const absoluteProductsPath = path.join(__dirname, './data/products.json');
-// const absoluteCartsPath = path.join(__dirname, './data/carts.json')
 
-// rutas absolutas a los JSON
-const absoluteProductsPath = path.join(__dirname, 'data', 'products.json');
-const absoluteCartsPath    = path.join(__dirname, 'data', 'carts.json');
-
-// Crear una instancia de ProductManager
-//const productManager = new ProductManager(absoluteProductsPath);
-//const cartManager = new CartManager(absoluteCartsPath);
 
 const app = express();
-const PORT = 8080;
+const httpServer = http.createServer(app);
+const io = new Server(httpServer);
 
-// Middleware para parsear JSON en el cuerpo de la petición
+
+// handlebars set up with engine()
+app.engine('handlebars', engine())
+app.set('view engine', 'handlebars')
+app.set('views', path.join(__dirname, 'views'));
+
+
+// Middleware: process JSON and set 'public ' dir
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Product Manager: we moved it here from the router as wed like to keep this available for all instead of having multiple instances that could be runing in paralel with outdated data
+const productsPath = path.join(__dirname, 'data', 'products.json');
+const productManager = new ProductManager(productsPath);
+app.set('productManager', productManager);
+
+app.set('io', io);
 
 
 
-// const productRouter = express.Router();
-
-// productRouter.get('/', async (req,res) => {
-//   try {
-//     const products = await productManager._getProducts();
-//     res.json({products});
-//   } catch (error) {
-//     res.status(500).json({error: error.message});
-//   }
-// });
-
-
-
-// productRouter.get('/:pid', async (req, res) => { 
-//   try {
-//     const pid = parseInt(req.params.pid, 10);
-//     const product = await productManager.getProductById(pid);
-//     if (!product) {
-//       return res.status(404).json({error: 'Product no encontrado'})
-//     }
-//     res.json(product);
-    
-//   } catch (error) {
-//     res.status(500).json({error: error.message})
-    
-//   }
-// });
-
-
-
-// productRouter.post('/', async (req, res) => {
-//   try {
-//     const productData = req.body;
-//     const newProduct = await productManager.addProduct(productData);
-//     res.status(201).json(newProduct);    
-//   } catch (error) {
-//     res.status(500).json({ error: error.message })
-//   }
-// })
-
-
-// productRouter.put('/:pid', async (req, res) => {
-//   try {
-//     const pid = parseInt(req.params.pid, 10);
-//     const updateData = req.body;
-//     const updatedProduct = await productManager.updateProduct(pid, updateData);
-//     res.json(updatedProduct);    
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-// productRouter.delete('/:pid', async (req, res) => {
-//   try {
-//     const pid = parseInt(req.params.pid, 10);
-//     await productManager.deleteProduct(pid);
-//     res.json({ message: 'Producto eliminado' });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-
-// const cartRouter = express.Router();
-
-// cartRouter.post('/', async (req, res) => {
-//   try {
-//     const newCart = await cartManager.createCart();
-//     res.status(201).json(newCart);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-// cartRouter.get('/:cid', async (req, res) => {
-//   try {
-//     const cid = parseInt(req.params.cid, 10);
-//     const cart = await cartManager.getCartById(cid);
-//     if (!cart) {
-//       return res.status(404).json({ error: 'Carrito no encontrado' });
-//     }
-//     res.json(cart);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-// cartRouter.post('/:cid/product/:pid', async (req, res) => {
-//   try {
-//     const cid = parseInt(req.params.cid, 10);
-//     const pid = parseInt(req.params.pid, 10);
-//     const updatedCart = await cartManager.addProductToCart(cid, pid);
-//     res.json(updatedCart);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-//  app.use('/products', productRouter);
-//  app.use('/carts', cartRouter);
-
-
-// use with /api/ as convention for specifieng endpoints that are just for data, separated from endpoints that serve views ,  fro example
+// Use with /api/ as convention for specifieng endpoints that are just for data, separated from endpoints that serve views 
+app.use('/', viewsRouter);
 app.use('/api/products', productRouter);
 app.use('/api/carts'   , cartRouter);
 
+// WebSocket
+io.on('connection', async (socket) => {
+  console.log('Nuevo cliente conectado');
+  const products = await productManager._getProducts();
+  socket.emit('products', products);
 
+  socket.on('addProduct', async (productData) => {
+    await productManager.addProduct(productData);
+    const allProducts = await productManager._getProducts();
+    io.emit('products', allProducts);
+  });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  socket.on('deleteProduct', async (id) => {
+    await productManager.deleteProduct(id);
+    const allProducts = await productManager._getProducts();
+    io.emit('products', allProducts);
+  });
+});
+
+const PORT = 8080;
+httpServer.listen(PORT, () => {
+  console.log(`Servidor activo en http://localhost:${PORT}`);
 });
