@@ -8,9 +8,24 @@ import { Server } from 'socket.io';
 import productRouter from './routes/products.js';
 import cartRouter    from './routes/carts.js';
 import viewsRouter from './routes/views.js'
+import ProductManager from './dao/managers/ProductManagerMongo.js';
+import CartManager from './dao/managers/CartManagerMongo.js';
 
-import ProductManager from './managers/ProductManager.js';
 
+
+import mongoose from 'mongoose';
+
+
+
+
+const MONGO_URL = 'mongodb://localhost:27017/ecommerce';
+
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Conectado a MongoDB'))
+.catch(err => console.error(' Error de conexión a MongoDB:', err));
 
 // Crear __dirname para ES modules usando import.meta.url
 const __filename = fileURLToPath(import.meta.url);
@@ -33,13 +48,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Product Manager: we moved it here from the router as wed like to keep this available for all instead of having multiple instances that could be runing in paralel with outdated data
-const productsPath = path.join(__dirname, 'data', 'products.json');
-const productManager = new ProductManager(productsPath);
+
+const productManager = new ProductManager();
 app.set('productManager', productManager);
-
+const cartManager = new CartManager();
+app.set('cartManager', cartManager);
 app.set('io', io);
-
 
 
 // Use with /api/ as convention for specifieng endpoints that are just for data, separated from endpoints that serve views 

@@ -1,0 +1,25 @@
+<h1>{{product.title}}</h1>
+<p><strong>Precio:</strong> ${{product.price}}</p>
+<p><strong>Descripción:</strong> {{product.description}}</p>
+<p><strong>Stock:</strong> {{product.stock}}</p>
+<p><strong>Categoría:</strong> {{product.category}}</p>
+
+<button id="addToCartBtn">Agregar al carrito</button>
+
+<script src="/js/cartManager.js"></script>
+<script>
+  document.getElementById('addToCartBtn').addEventListener('click', async () => {
+    const cartId = await getOrCreateCartId();
+    const productId = "{{product._id}}";
+
+    const res = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+      method: 'POST'
+    });
+
+    if (res.ok) {
+      alert('Producto agregado al carrito');
+    } else {
+      alert('Error al agregar el producto');
+    }
+  });
+</script>

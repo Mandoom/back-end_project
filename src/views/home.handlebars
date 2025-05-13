@@ -1,7 +1,46 @@
 <h1>Lista de productos (HTTP)</h1>
+<h1>Productos</h1>
 <ul>
   {{#each products}}
-    <li>{{this.title}} — ${{this.price}}</li>
+    <li>
+      <h2>{{title}}</h2>
+      <p>Precio: ${{price}}</p>
+      <p>{{description}}</p>
+      <a href="/products/{{_id}}">Ver detalles</a>
+      <button class="add-to-cart" data-id="{{_id}}">Agregar</button>
+
+    </li>
   {{/each}}
+  <script src="/js/cartManager.js"></script>
+<script>
+  document.querySelectorAll('.add-to-cart').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const cartId = await getOrCreateCartId();
+      const productId = btn.dataset.id;
+
+      const res = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        alert('Agregado al carrito');
+      } else {
+        alert('Error al agregar');
+      }
+    });
+  });
+</script>
 </ul>
+
+<div class="pagination">
+  {{#if pagination.hasPrevPage}}
+    <a href="?page={{pagination.prevPage}}">Anterior</a>
+  {{/if}}
+
+  Página {{pagination.page}} de {{pagination.totalPages}}
+
+  {{#if pagination.hasNextPage}}
+    <a href="?page={{pagination.nextPage}}">Siguiente</a>
+  {{/if}}
+</div>
 
