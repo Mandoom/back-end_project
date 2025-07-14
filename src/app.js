@@ -14,8 +14,9 @@ import CartManager from './dao/managers/CartManagerMongo.js';
 
 
 import mongoose from 'mongoose';
-
-
+//Session routes
+import sessionRouter from './routes/sessions.js';
+import passport from './config/passport.js';
 
 
 const MONGO_URL = 'mongodb://localhost:27017/ecommerce';
@@ -47,6 +48,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware: process JSON and set 'public ' dir
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.urlencoded({ extended: true }));
 
 
 const productManager = new ProductManager();
@@ -60,6 +62,11 @@ app.set('io', io);
 app.use('/', viewsRouter);
 app.use('/api/products', productRouter);
 app.use('/api/carts'   , cartRouter);
+
+// use passport 
+
+app.use(passport.initialize());
+app.use('/api/sessions', sessionRouter);
 
 // WebSocket
 io.on('connection', async (socket) => {
