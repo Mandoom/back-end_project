@@ -33,10 +33,15 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
+    //res.redirect('/products');
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+  
+
 });
+
+
 
 // Obtener usuario actual (protegido con JWT)
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
