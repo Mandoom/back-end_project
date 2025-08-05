@@ -4,6 +4,7 @@ import passport from 'passport';
 import UserModel from '../dao/models/UserModel.js';
 import { createHash, isValidPassword } from '../utils/hash.js';
 import { JWT_SECRET } from '../config/passport.js';
+import UserDTO from '../dto/UserDTO.js';
 
 const router = Router();
 
@@ -45,7 +46,11 @@ router.post('/login', async (req, res) => {
 
 // Obtener usuario actual (protegido con JWT)
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.json({ user: req.user });
+  //res.json({ user: req.user });
+
+  const safeUser = new UserDTO(req.user);
+  res.json({ user: safeUser });
+
 });
 
 export default router;
