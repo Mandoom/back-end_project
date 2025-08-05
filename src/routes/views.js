@@ -3,8 +3,8 @@ import { Router } from 'express';
 const router = Router();
 
 router.get('/products', async (req, res) => {
-  const productManager = req.app.get('productManager');
-  const result = await productManager._getProducts(req.query);
+  const productRepository = req.app.get('productRepository');
+  const result = await productRepository.getProducts(req.query);
 
   res.render('home', {
     products: result.docs,
@@ -20,15 +20,15 @@ router.get('/products', async (req, res) => {
 });
 
 router.get('/products/:pid', async (req, res) => {
-  const productManager = req.app.get('productManager');
-  const product = await productManager.getProductById(req.params.pid);
+  const productRepository = req.app.get('productRepository');
+  const product = await productRepository.getProductById(req.params.pid);
   if (!product) return res.status(404).send('Producto no encontrado');
   res.render('productDetails', { product });
 });
 
 router.get('/carts/:cid', async (req, res) => {
-  const cartManager = req.app.get('cartManager');
-  const cart = await cartManager.getCartById(req.params.cid);
+  const cartRepository = req.app.get('cartRepository');
+  const cart = await cartRepository.getCartById(req.params.cid);
   if (!cart) return res.status(404).send('Carrito no encontrado');
   res.render('cart', { cart });
 });
