@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config(); // ✅ debe ir lo más arriba posible
+
 import express from 'express';
 import handlebars from 'express-handlebars';
 import path from 'path';
@@ -13,6 +16,8 @@ import CartManager from './dao/managers/CartManagerMongo.js';
 
 import ProductRepository from './dao/repositories/ProductRepository.js';
 import CartRepository from './dao/repositories/CartRepository.js';
+
+
 
 // instance of the repositories
 const productRepository = new ProductRepository(new ProductManager());

@@ -41,4 +41,10 @@ router.get('/register', (req, res) => {
   res.render('register');
 });
 
+
+// Real Time: usa Socket.io
+router.get('/realtimeproducts', (req, res) => {
+  res.render('realTimeProducts');
+});
+
 export default router;

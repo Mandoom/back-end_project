@@ -1,5 +1,6 @@
 import { Router } from 'express';
-
+import passport from 'passport';
+import authorize from '../utils/authorize.js';
 const router = Router();
 
 // Obtener productos paginados, filtrados y ordenados
@@ -50,48 +51,92 @@ router.get('/:pid', async (req, res) => {
 });
 
 // Crear un nuevo producto
-router.post('/', async (req, res) => {
-  try {
-    const productRepository = req.app.get('productRepository');
-    const io = req.app.get('io');
+// router.post('/', async (req, res) => {
+//   try {
+//     const productRepository = req.app.get('productRepository');
+//     const io = req.app.get('io');
 
-    const newProduct = await productRepository.createProduct(req.body);
+//     const newProduct = await productRepository.createProduct(req.body);
 
-    const allProducts = await productRepository.getProducts(req.query);
-    io.emit('products', allProducts);
+//     const allProducts = await productRepository.getProducts(req.query);
+//     io.emit('products', allProducts);
 
-    res.status(201).json(newProduct);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+//     res.status(201).json(newProduct);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// Crear un nuevo producto (solo admin)
+router.post(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const productRepository = req.app.get('productRepository');
+      const io = req.app.get('io');
+
+      const newProduct = await productRepository.createProduct(req.body);
+      const allProducts = await productRepository.getProducts(req.query);
+      io.emit('products', allProducts);
+
+      res.status(201).json(newProduct);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 // Actualizar un producto existente
-router.put('/:pid', async (req, res) => {
-  try {
-    const productRepository = req.app.get('productRepository');
-    const updatedProduct = await productRepository.updateProduct(req.params.pid, req.body);
-    res.json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+// router.put('/:pid', async (req, res) => {
+//   try {
+//     const productRepository = req.app.get('productRepository');
+//     const updatedProduct = await productRepository.updateProduct(req.params.pid, req.body);
+//     res.json(updatedProduct);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// Actualizar un producto existente (solo admin)
+router.put(
+  '/:pid',
+  passport.authenticate('jwt', { session: false }),
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const productRepository = req.app.get('productRepository');
+      const updatedProduct = await productRepository.updateProduct(req.params.pid, req.body);
+      res.json(updatedProduct);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 // Eliminar un producto
-router.delete('/:pid', async (req, res) => {
-  try {
-    const productRepository = req.app.get('productRepository');
-    const io = req.app.get('io');
+// 
 
-    await productRepository.deleteProduct(req.params.pid);
+// Eliminar un producto (solo admin)
+router.delete(
+  '/:pid',
+  passport.authenticate('jwt', { session: false }),
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const productRepository = req.app.get('productRepository');
+      const io = req.app.get('io');
 
-    const allProducts = await productRepository.getProducts();
-    io.emit('products', allProducts);
+      await productRepository.deleteProduct(req.params.pid);
+      const allProducts = await productRepository.getProducts({});
+      io.emit('products', allProducts);
 
-    res.json({ message: 'Producto eliminado' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.json({ message: 'Producto eliminado' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 export default router;
