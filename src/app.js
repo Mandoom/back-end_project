@@ -17,11 +17,16 @@ import CartManager from './dao/managers/CartManagerMongo.js';
 import ProductRepository from './dao/repositories/ProductRepository.js';
 import CartRepository from './dao/repositories/CartRepository.js';
 
+import TicketRepository from './dao/repositories/TicketRepository.js';
+
+
+
 
 
 // instance of the repositories
 const productRepository = new ProductRepository(new ProductManager());
 const cartRepository = new CartRepository(new CartManager());
+const ticketRepository = new TicketRepository();
 
 import mongoose from 'mongoose';
 // Session routes
@@ -67,6 +72,7 @@ app.use(express.urlencoded({ extended: true }));
 // Repositories
 app.set('productRepository', productRepository);
 app.set('cartRepository', cartRepository);
+app.set('ticketRepository', ticketRepository);
 
 // WebSocket (for real-time updates in views)
 app.set('io', io);

@@ -1,4 +1,4 @@
-import TicketModel from '../dao/models/TicketModel.js';
+import TicketModel from '../../dao/models/TicketModel.js';
 
 const generateTicketCode = () => `T-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 

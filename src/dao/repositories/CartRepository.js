@@ -31,4 +31,8 @@ export default class CartRepository {
   clearCart(cid) {
     return this.dao.clearCart(cid);
   }
+
+  updateCartProducts(cid, updatedProducts) {
+  return this.dao.updateCartProducts(cid, updatedProducts);
+}
 }

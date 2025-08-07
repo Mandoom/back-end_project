@@ -22,4 +22,8 @@ export default class ProductRepository {
   deleteProduct(id) {
     return this.dao.deleteProduct(id);
   }
+
+  updateProductStock(id, newStock) {
+  return this.dao.updateProductStock(id, newStock);
+}
 }

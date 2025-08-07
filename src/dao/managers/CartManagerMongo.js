@@ -55,4 +55,12 @@ export default class CartManager {
     await cart.save();
     return cart;
   }
+
+  async updateCartProducts(cid, updatedProducts) {
+  const cart = await CartModel.findById(cid);
+  cart.products = updatedProducts;
+  await cart.save();
+  return cart;
+}
+
 }

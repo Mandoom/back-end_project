@@ -38,4 +38,15 @@ export default class ProductManager {
   async deleteProduct(id) {
     return await ProductModel.findByIdAndDelete(id);
   }
+
+async updateProductStock(id, newStock) {
+  return await ProductModel.findByIdAndUpdate(
+    id,
+    { stock: newStock },
+    { new: true }
+  );
+}
+
+
+
 }
